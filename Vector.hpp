@@ -6,7 +6,7 @@
 /*   By: hmunoz-g <hmunoz-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/19 15:12:51 by hmunoz-g          #+#    #+#             */
-/*   Updated: 2025/08/20 11:56:00 by hmunoz-g         ###   ########.fr       */
+/*   Updated: 2025/08/20 16:05:18 by hmunoz-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -81,6 +81,64 @@ class Vector {
 			
 			return (*this);
 		}
+
+		Vector operator+(const Vector &other) {
+			return (add(*this, other));
+		}
+
+		Vector operator-(const Vector &other) {
+			return (sub(*this, other));
+		}
+
+		Vector operator*(const T &scalar) {
+			return (scl(*this, scalar));
+		}
 };
+
+// ex00
+	template<typename T>
+	Vector<T> add(const Vector<T> &u, const Vector<T> &v) {
+		if (u.getSize() != v.getSize()) {
+			throw std::invalid_argument("Vectors must have the same size for addition");
+		}
+
+		std::vector<T> result;
+		result.reserve(u.getSize());
+
+		for (size_t i = 0; i < u.getSize(); ++i) {
+			result.push_back(u[i] + v[i]);
+		}
+
+		return (Vector<T>(result));
+	}
+
+	template<typename T>
+	Vector<T> sub(const Vector<T> &u, const Vector<T> &v) {
+		if (u.getSize() != v.getSize()) {
+			throw std::invalid_argument("Vectors must have the same size for substraction");
+		}
+
+		std::vector<T> result;
+		result.reserve(u.getSize());
+
+		for (size_t i = 0; i < u.getSize(); ++i) {
+			result.push_back(u[i] - v[i]);
+		}
+
+		return (Vector<T>(result));
+	}
+
+	template<typename T>
+	Vector<T> scl(const Vector<T> &u, const T scalar) {
+		std::vector<T> result;
+		result.reserve(u.getSize());
+
+		for (size_t i = 0; i < u.getSize(); ++i) {
+			result.push_back(u[i] * scalar);
+		}
+
+		return (Vector<T>(result));
+	}
+			
 
 #endif
