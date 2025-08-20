@@ -6,7 +6,7 @@
 /*   By: hmunoz-g <hmunoz-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/19 15:12:51 by hmunoz-g          #+#    #+#             */
-/*   Updated: 2025/08/20 16:05:18 by hmunoz-g         ###   ########.fr       */
+/*   Updated: 2025/08/20 17:18:32 by hmunoz-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,7 @@
 # include <iostream>
 # include <exception>
 # include <stdexcept>
+# include <cmath>
 
 template <typename T> class Matrix;
 
@@ -35,6 +36,8 @@ class Vector {
 		Vector(const std::vector<T>& data) : _data(data) {}
 		
 		Vector(const Vector &other): _data(other._data) {}
+
+		Vector(size_t size, const T &value = T{}): _data(size, value) {}
 
 		~Vector() = default;
 
@@ -139,6 +142,32 @@ class Vector {
 
 		return (Vector<T>(result));
 	}
-			
+
+// ex01
+	template<typename T>
+	Vector<T> linear_combination(const std::vector<Vector<T>> &vectors, const std::vector<T> &coeffs) {
+		if (vectors.size() != coeffs.size()) {
+			throw std::invalid_argument("Amount of vectors and coefficients must match");
+		}
+
+		if (vectors.empty()) {
+        	throw std::invalid_argument("Cannot compute linear combination of empty vector list");
+    	}
+
+		Vector<T> result(vectors[0].getSize(), T{});
+
+		// Version with no fma (using ex00 functions)
+		/* for (size_t i = 0; i < vectors.size(); ++i) {
+			result = add (result, scl(vectors[i], coeffs[i]));
+		} */
+
+		// Version with fma (Fused Multiply-Add)
+		for (size_t i = 0; i < result.getSize(); ++i) {
+			for (size_t j = 0; j < vectors.size(); ++j) {
+				result[i] = std::fma(coeffs[j], vectors[j][i], result[i]);
+			}
+		}
+		return (result);
+	}
 
 #endif
