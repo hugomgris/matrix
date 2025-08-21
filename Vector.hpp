@@ -6,7 +6,7 @@
 /*   By: hmunoz-g <hmunoz-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/19 15:12:51 by hmunoz-g          #+#    #+#             */
-/*   Updated: 2025/08/20 17:18:32 by hmunoz-g         ###   ########.fr       */
+/*   Updated: 2025/08/21 10:14:02 by hmunoz-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -168,6 +168,37 @@ class Vector {
 			}
 		}
 		return (result);
+	}
+
+// ex02
+/*
+Two main ways/formulas to calculate the lerp:
+	- A) lerp(start, end, t) = start + t * (end - start)
+	- B) lerp(start, end, t) = (1 - t) * start + t * end
+*/
+	template<typename T>
+	Vector<T> lerp(const Vector<T> &u, const Vector<T> &v, const T t) {
+		if (u.getSize() != v.getSize()) {
+			throw std::invalid_argument("Vectors must have the same size for a linear interpolation");
+		}
+
+		std::vector<T> result_data;
+		result_data.reserve(u.getSize());
+		
+		// using A)
+		/* Vector<T> diff = sub(v, u);
+		diff = scl(diff, t);
+		result_data = add(u, diff).getData();
+		return (Vector<T>(result_data)); */
+
+		// using B)
+		/* Vector<T> wStart = scl(u, 1 - t);
+		Vector<T> wEnd = scl(v, t);
+		result_data = add(wStart, wEnd).getData();
+		return (Vector<T>(result_data)); */
+
+		// using ex01 linear combination
+		return linear_combination<T>({u, v}, {T{1} - t, t});
 	}
 
 #endif
