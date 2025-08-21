@@ -6,7 +6,7 @@
 /*   By: hmunoz-g <hmunoz-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/19 15:12:51 by hmunoz-g          #+#    #+#             */
-/*   Updated: 2025/08/21 17:35:12 by hmunoz-g         ###   ########.fr       */
+/*   Updated: 2025/08/21 17:51:35 by hmunoz-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -156,12 +156,6 @@ class Vector {
 
 		Vector<T> result(vectors[0].getSize(), T{});
 
-		// Version with no fma (using ex00 functions)
-		/* for (size_t i = 0; i < vectors.size(); ++i) {
-			result = add (result, scl(vectors[i], coeffs[i]));
-		} */
-
-		// Version with fma (Fused Multiply-Add)
 		for (size_t i = 0; i < result.getSize(); ++i) {
 			for (size_t j = 0; j < vectors.size(); ++j) {
 				result[i] = std::fma(coeffs[j], vectors[j][i], result[i]);
