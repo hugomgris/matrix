@@ -6,7 +6,7 @@
 /*   By: hmunoz-g <hmunoz-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/19 15:12:51 by hmunoz-g          #+#    #+#             */
-/*   Updated: 2025/08/21 10:14:02 by hmunoz-g         ###   ########.fr       */
+/*   Updated: 2025/08/21 15:45:49 by hmunoz-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -201,4 +201,76 @@ Two main ways/formulas to calculate the lerp:
 		return linear_combination<T>({u, v}, {T{1} - t, t});
 	}
 
+// ex03
+	template<typename T>
+	T dot(const Vector<T> &u, const Vector<T> &v) {
+		if (u.getSize() != v.getSize()) {
+			throw std::invalid_argument("Vectors must have the same size for a dot product");
+		}
+		
+		T result = T{};
+		// regular way
+		/* for (size_t i = 0; i < u.getSize(); ++i) {
+			result += u[i] * v[i];
+		} */
+
+		// fma way
+		for (size_t i = 0; i < u.getSize(); ++i) {
+			result = std::fma(u[i], v[i], result);
+		}
+
+		return (result);
+	}
+
+// ex04
+	// norm = distance measure
+	template<typename T>
+	T norm_1(const Vector<T> &u) {
+		T result = T{};
+
+		for (size_t i = 0; i < u.getSize(); ++i) {
+			result += std::max(u[i], -u[i]);
+		}
+
+		return (result);
+	}
+
+	template<typename T>
+	T norm(const Vector<T> &u) {
+		return (std::pow(dot(u, u), T{0.5}));
+	}
+
+	template<typename T>
+	T norm_inf(const Vector<T> &u) {
+		if (u.getSize() == 0) {
+			throw std::invalid_argument("Cannot compute norm of empty vector");
+		}
+		
+		T result = std::max(u[0], -u[0]);
+		for (size_t i = 1; i < u.getSize(); ++i) {
+			T abs = std::max(u[i], -u[i]);
+			result = std::max(result, abs);
+		}
+
+		return (result);
+	}
+
+// ex05
+	template<typename T>
+	T angle_cos(const Vector<T> &u, const Vector<T> &v) {
+		if (u.getSize() == 0 || v.getSize() == 0) {
+			throw std::invalid_argument("Vectors can't be empty for a cosine calculation");
+		} else if (u.getSize() != v.getSize()) {
+			throw std::invalid_argument("Vectors need to have same size for a cosine calculation");
+		}
+
+		T dotProd = dot(u, v);
+		T normProd = norm(u) * norm(v);
+
+		if (normProd == T{}) {
+     	   throw std::invalid_argument("Cannot compute angle with zero vector");
+    	}
+
+		return (dotProd / normProd);
+	}
 #endif
