@@ -6,7 +6,7 @@
 /*   By: hmunoz-g <hmunoz-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/19 15:12:51 by hmunoz-g          #+#    #+#             */
-/*   Updated: 2025/08/21 15:45:49 by hmunoz-g         ###   ########.fr       */
+/*   Updated: 2025/08/21 17:35:12 by hmunoz-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -272,5 +272,19 @@ Two main ways/formulas to calculate the lerp:
     	}
 
 		return (dotProd / normProd);
+	}
+
+// ex06
+	template<typename T>
+	Vector<T> cross_product(const Vector<T> &u, const Vector<T> &v) {
+		if (u.getSize() != 3 || v.getSize() != 3) {
+			throw std::invalid_argument("Cross product can only be defined for 3D vectors");
+		}
+
+		T x = (u[1] * v[2]) - (u[2] * v[1]);
+		T y = (u[2] * v[0]) - (u[0] * v[2]);
+		T z = (u[0] * v[1]) - (u[1] * v[0]);
+
+		return (Vector<T>({x, y, z}));
 	}
 #endif
