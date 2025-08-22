@@ -6,7 +6,7 @@
 /*   By: hmunoz-g <hmunoz-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/19 15:30:27 by hmunoz-g          #+#    #+#             */
-/*   Updated: 2025/08/22 12:50:32 by hmunoz-g         ###   ########.fr       */
+/*   Updated: 2025/08/22 13:26:02 by hmunoz-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -74,9 +74,13 @@ class Matrix {
 
 		// Getters
 		const std::vector<T> &getData() const { return (_data); }
+
 		size_t getRows() const { return (_rows); }
+
 		size_t getCols() const { return (_cols); }
+
 		std::pair<size_t, size_t> getShape() const { return (std::pair<size_t, size_t>(_rows, _cols)); }
+
 		size_t getPivot(size_t current_row, size_t current_col) const {
 			for (size_t i = current_row; i < getRows(); i++) {
 				if (std::abs((*this)(i, current_col)) > 1e-10) {
@@ -84,7 +88,7 @@ class Matrix {
 				}
 			}
 			return SIZE_MAX;
-		}
+		}	
 
 		// Methods
 		void print() const {
@@ -289,6 +293,104 @@ Matrix<T> row_echelon(const Matrix<T> &A) {
     }
     
     return result;
+}
+
+// This is used by the next exercise. Same function but with swap tracking to know the determinant sign for complex matrices
+template<typename T>
+std::pair<Matrix<T>, int> row_echelon_with_swaps(const Matrix<T> &A) {
+    Matrix<T> result = A;
+    int swap_count = 0;
+    
+    size_t current_row = 0;
+    
+    for (size_t col = 0; col < result.getCols() && current_row < result.getRows(); ++col) {
+        size_t pivot_row = result.getPivot(current_row, col);
+        
+        if (pivot_row == SIZE_MAX) {
+            continue;
+        }
+        
+        if (pivot_row != current_row) {
+            result.swap_rows(current_row, pivot_row);
+            swap_count++;
+        }
+        
+        result.eliminate_below(current_row, col);
+        current_row++;
+    }
+    
+    return std::make_pair(result, swap_count);
+}
+
+// ex11
+
+template<typename T>
+Matrix<T> getMinor(const Matrix<T> &A, size_t remove_row, size_t remove_col) {
+    size_t rows = A.getRows();
+    size_t cols = A.getCols();
+    
+    Matrix<T> minor(rows - 1, cols - 1);
+    
+    size_t minor_row = 0;
+    for (size_t i = 0; i < rows; ++i) {
+        if (i == remove_row) continue;
+        
+        size_t minor_col = 0;
+        for (size_t j = 0; j < cols; ++j) {
+            if (j == remove_col) continue;
+            
+            minor(minor_row, minor_col) = A(i, j);
+            minor_col++;
+        }
+        minor_row++;
+    }
+    
+    return minor;
+}
+
+template<typename T>
+T determinant(const Matrix<T> &A) {
+	if (A.getRows() != A.getCols()) {
+        throw std::invalid_argument("Determinant only defined for square matrices");
+    }
+
+	size_t n = A.getRows();
+    
+    if (n == 1) {
+        return A(0, 0);
+    }
+
+	if (n == 2) {
+        return ((A(0,0) * A(1,1)) - (A(0,1) * A(1,0)));
+    }
+
+	T det = T{};
+    for (size_t j = 0; j < n; ++j) {
+        Matrix<T> minor = getMinor(A, 0, j);
+        T cofactor = ((j % 2 == 0) ? 1 : -1) * determinant(minor);
+        det += A(0, j) * cofactor;
+    }
+    return det;
+}
+
+template<typename T>
+T determinant_efficient(const Matrix<T> &A) {
+    if (A.getRows() != A.getCols()) {
+        throw std::invalid_argument("Determinant only defined for square matrices");
+    }
+    
+    auto [ref, swap_count] = row_echelon_with_swaps(A);
+    
+    T det = T{1};
+    for (size_t i = 0; i < A.getRows(); ++i) {
+        det *= ref(i, i);
+    }
+    
+    if (swap_count % 2 == 1) {
+        det = -det;
+    }
+    
+    return det;
 }
 
 #endif
