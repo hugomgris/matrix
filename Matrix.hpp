@@ -6,7 +6,7 @@
 /*   By: hmunoz-g <hmunoz-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/19 15:30:27 by hmunoz-g          #+#    #+#             */
-/*   Updated: 2025/08/22 10:18:07 by hmunoz-g         ###   ########.fr       */
+/*   Updated: 2025/08/22 11:17:54 by hmunoz-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -197,5 +197,20 @@ Matrix<T> mul_mat(const Matrix<T> &A, const Matrix<T> &B) {
     }
 
 	return (result);
+}
+
+// ex08
+template<typename T>
+T trace(const Matrix<T> &A) {
+	if (A.getRows() != A.getCols()) {
+		throw std::invalid_argument("Trace can only be computed for square matrices (nRows = nCols)");
+	}
+
+	T sum = T{};
+	for (size_t i = 0; i < A.getRows(); ++i) {
+		sum += A(i, i);
+	}
+
+	return (sum);
 }
 #endif
