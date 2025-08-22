@@ -6,7 +6,7 @@
 /*   By: hmunoz-g <hmunoz-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/19 15:30:27 by hmunoz-g          #+#    #+#             */
-/*   Updated: 2025/08/22 11:46:25 by hmunoz-g         ###   ########.fr       */
+/*   Updated: 2025/08/22 12:50:32 by hmunoz-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -77,6 +77,14 @@ class Matrix {
 		size_t getRows() const { return (_rows); }
 		size_t getCols() const { return (_cols); }
 		std::pair<size_t, size_t> getShape() const { return (std::pair<size_t, size_t>(_rows, _cols)); }
+		size_t getPivot(size_t current_row, size_t current_col) const {
+			for (size_t i = current_row; i < getRows(); i++) {
+				if (std::abs((*this)(i, current_col)) > 1e-10) {
+					return i; 
+				}
+			}
+			return SIZE_MAX;
+		}
 
 		// Methods
 		void print() const {
@@ -96,6 +104,33 @@ class Matrix {
 			return (Vector<T>(_data));
 		}
 
+		void swap_rows(size_t row_1, size_t row_2) {
+			if (row_1 == row_2) return;
+			
+			for (size_t j = 0; j < getCols(); j++) {
+				T temp = (*this)(row_1, j);
+				(*this)(row_1, j) = (*this)(row_2, j);
+				(*this)(row_2, j) = temp;
+			}
+		}
+
+		void eliminate_below(size_t pivot_row, size_t pivot_col) {
+			T pivot = (*this)(pivot_row, pivot_col);
+			
+			if (std::abs(pivot) < 1e-10) return;
+			
+			for (size_t i = pivot_row + 1; i < getRows(); ++i) {
+				T element = (*this)(i, pivot_col);
+				
+				if (std::abs(element) > 1e-10) {
+					T factor = element / pivot;
+					
+					for (size_t j = pivot_col; j < getCols(); ++j) {
+						(*this)(i, j) = (*this)(i, j) - factor * (*this)(pivot_row, j);
+					}
+				}
+			}
+		}
 
 		// Operator overloads
 		T &operator[](size_t index) { return (_data[index]); }
@@ -230,4 +265,30 @@ Matrix<T> transpose(const Matrix<T> &A) {
 
 	return (transposed);
 }
+
+// ex10
+template<typename T>
+Matrix<T> row_echelon(const Matrix<T> &A) {
+    Matrix<T> result = A;
+    
+    size_t current_row = 0;
+    
+    for (size_t col = 0; col < result.getCols() && current_row < result.getRows(); ++col) {
+        size_t pivot_row = result.getPivot(current_row, col);
+        
+        if (pivot_row == SIZE_MAX) {
+            continue;
+        }
+        
+        if (pivot_row != current_row) {
+            result.swap_rows(current_row, pivot_row);
+        }
+        
+        result.eliminate_below(current_row, col);
+        current_row++;
+    }
+    
+    return result;
+}
+
 #endif
