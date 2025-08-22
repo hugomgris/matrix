@@ -6,7 +6,7 @@
 /*   By: hmunoz-g <hmunoz-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/19 15:30:27 by hmunoz-g          #+#    #+#             */
-/*   Updated: 2025/08/20 11:55:37 by hmunoz-g         ###   ########.fr       */
+/*   Updated: 2025/08/22 10:18:07 by hmunoz-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -127,4 +127,75 @@ class Matrix {
 		}
 };
 
+// ex07
+template<typename T>
+Vector<T> mul_vec(const Matrix<T> &A, const Vector<T> &u) {
+	if (A.getCols() != u.getSize()) {
+		throw std::invalid_argument("Matrix columns must match vector size");
+	}
+
+	std::vector<T> result_data;
+	result_data.reserve(A.getRows());
+
+	// Version with dot product
+	/* for (size_t i = 0; i < A.getRows(); ++i) {
+		std::vector<T> matrixElements;
+		for (size_t j = 0; j < A.getCols(); ++j) {
+			matrixElements.push_back(A(i, j));
+		}
+		result_data.push_back(dot(Vector<T>(matrixElements), u));
+	} */
+
+	// Version with fma
+	for (size_t i = 0; i < A.getRows(); ++i) {
+        T sum = T{};
+        for (size_t j = 0; j < A.getCols(); ++j) {
+            sum = std::fma(A(i, j), u[j], sum);
+        }
+        result_data.push_back(sum);
+    }
+
+	return (Vector<T>(result_data));
+}
+
+template<typename T>
+Matrix<T> mul_mat(const Matrix<T> &A, const Matrix<T> &B) {
+	// A is m×n, B must be n×p
+	if (A.getCols() != B.getRows()) {
+		throw std::invalid_argument("Matrix A columns must match Matrix B rows");
+	}
+
+	//Matrix(size_t rows, size_t cols, std::vector<T> data)
+	size_t result_rows = A.getRows();
+	size_t result_cols = B.getCols();
+	size_t n = A.getCols();
+
+	Matrix<T> result(result_rows, result_cols);
+
+	// version with dot product
+	/* for (size_t i = 0; i < A.getRows(); ++i) {
+		for (size_t j = 0; j < B.getCols(); ++j) {
+			std::vector<T> A_data;
+			std::vector<T> B_data;
+			for (size_t k = 0; k < n; ++k){
+				A_data.push_back(A(i, k));
+				B_data.push_back(B(k, j));
+			}
+			result(i, j) = dot(Vector<T>(A_data), Vector<T>(B_data));
+		}
+	} */
+
+	// version with fma
+	for (size_t i = 0; i < result_rows; ++i) {
+        for (size_t j = 0; j < result_cols; ++j) {
+            T sum = T{};
+            for (size_t k = 0; k < n; ++k) {
+                sum = std::fma(A(i, k), B(k, j), sum);
+            }
+            result(i, j) = sum;
+        }
+    }
+
+	return (result);
+}
 #endif
