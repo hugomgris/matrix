@@ -6,7 +6,7 @@
 /*   By: hmunoz-g <hmunoz-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/19 15:30:27 by hmunoz-g          #+#    #+#             */
-/*   Updated: 2025/08/22 14:35:57 by hmunoz-g         ###   ########.fr       */
+/*   Updated: 2025/08/22 14:50:27 by hmunoz-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -470,6 +470,45 @@ Matrix<T> inverse(const Matrix<T> &A) {
     }
     
     return result;
+}
+
+// ex13
+template<typename T>
+size_t rank(const Matrix<T> &A) {
+    Matrix<T> ref = row_echelon(A);
+    
+    size_t rank_count = 0;
+    for (size_t i = 0; i < ref.getRows(); ++i) {
+        bool is_zero_row = true;
+        for (size_t j = 0; j < ref.getCols(); ++j) {
+            if (std::abs(ref(i, j)) > 1e-10) {
+                is_zero_row = false;
+                break;
+            }
+        }
+        if (!is_zero_row) rank_count++;
+    }
+    
+    return rank_count;
+}
+
+template<typename T>
+size_t nullity(const Matrix<T> &A) {
+    return A.getCols() - rank(A);
+}
+
+template<typename T>
+void verify_rank_nullity_theorem(const Matrix<T> &A) {
+    size_t r = rank(A);
+    size_t n = nullity(A);
+    size_t cols = A.getCols();
+    
+    std::cout << "Matrix: " << A.getRows() << "×" << cols << std::endl;
+    std::cout << "Rank: " << r << std::endl;
+    std::cout << "Nullity: " << n << std::endl;
+    std::cout << "Sum: " << (r + n) << std::endl;
+    std::cout << "Columns: " << cols << std::endl;
+    std::cout << "Theorem verified: " << (r + n == cols ? "TRUE" : "FALSE") << std::endl;
 }
 
 #endif
