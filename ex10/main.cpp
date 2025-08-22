@@ -6,7 +6,7 @@
 /*   By: hmunoz-g <hmunoz-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/20 15:30:50 by hmunoz-g          #+#    #+#             */
-/*   Updated: 2025/08/22 12:52:04 by hmunoz-g         ###   ########.fr       */
+/*   Updated: 2025/08/22 13:04:15 by hmunoz-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,6 +41,14 @@ int main() {
     Matrix<float> ref_C = row_echelon(C);
     std::cout << "Should remain unchanged:" << std::endl;
     ref_C.print();
+
+    Matrix<float> D(4, 4, {0, 2, 1, 3, 1, 3, 2, 1, 2, 1, 4, 5, 1, 1, 1, 2});
+    std::cout << "\nComplex case (no 0,0 pivot, requires row swapping, non trivial elimination, multiple pivot choices):" << std::endl;
+    D.print();
+
+    Matrix<float> ref_D = row_echelon(D);
+    std::cout << "REF of D" << std::endl;
+    ref_D.print();
     
     return 0;
 }
