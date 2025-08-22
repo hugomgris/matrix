@@ -6,7 +6,7 @@
 /*   By: hmunoz-g <hmunoz-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/19 15:30:27 by hmunoz-g          #+#    #+#             */
-/*   Updated: 2025/08/22 11:17:54 by hmunoz-g         ###   ########.fr       */
+/*   Updated: 2025/08/22 11:46:25 by hmunoz-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -212,5 +212,22 @@ T trace(const Matrix<T> &A) {
 	}
 
 	return (sum);
+}
+
+// ex09
+template<typename T>
+Matrix<T> transpose(const Matrix<T> &A) {
+	size_t rows = A.getRows();
+	size_t cols = A.getCols();
+
+	Matrix<T> transposed(cols, rows);
+
+	for (size_t i = 0; i < A.getRows(); ++i) {
+		for (size_t j = 0; j < A.getCols(); ++j) {
+			transposed(j, i) = A(i, j);
+		}
+	}
+
+	return (transposed);
 }
 #endif
