@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Matrix.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hmunoz-g <hmunoz-g@student.42.fr>          +#+  +:+       +#+        */
+/*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/19 15:30:27 by hmunoz-g          #+#    #+#             */
-/*   Updated: 2025/08/22 14:50:27 by hmunoz-g         ###   ########.fr       */
+/*   Updated: 2025/08/22 17:43:55 by marvin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,8 @@
 # include <iostream>
 # include <exception>
 # include <stdexcept>
+# include <cstdint>
+# include <cmath>
 
 template<typename T> class Vector;
 
@@ -511,4 +513,21 @@ void verify_rank_nullity_theorem(const Matrix<T> &A) {
     std::cout << "Theorem verified: " << (r + n == cols ? "TRUE" : "FALSE") << std::endl;
 }
 
+// ex14
+template<typename T>
+Matrix<T> projection(T fov, T ratio, T near, T far) {
+    T fov_rad = fov * M_PI / 180.0;
+    
+    T tan_half_fov = std::tan(fov_rad / 2.0);
+    
+    Matrix<T> proj(4, 4);
+    
+    proj(0, 0) = 1.0 / (ratio * tan_half_fov);
+    proj(1, 1) = 1.0 / tan_half_fov;
+    proj(2, 2) = -(far + near) / (far - near);
+    proj(2, 3) = -(2.0 * far * near) / (far - near);
+    proj(3, 2) = -1.0;
+	
+    return proj;
+}
 #endif
