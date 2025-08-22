@@ -6,7 +6,7 @@
 /*   By: hmunoz-g <hmunoz-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/19 15:30:27 by hmunoz-g          #+#    #+#             */
-/*   Updated: 2025/08/22 13:26:02 by hmunoz-g         ###   ########.fr       */
+/*   Updated: 2025/08/22 14:35:57 by hmunoz-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -241,7 +241,7 @@ Matrix<T> mul_mat(const Matrix<T> &A, const Matrix<T> &B) {
 // ex08
 template<typename T>
 T trace(const Matrix<T> &A) {
-	if (A.getRows() != A.getCols()) {
+	if (!A.isSquare()) {
 		throw std::invalid_argument("Trace can only be computed for square matrices (nRows = nCols)");
 	}
 
@@ -323,7 +323,6 @@ std::pair<Matrix<T>, int> row_echelon_with_swaps(const Matrix<T> &A) {
 }
 
 // ex11
-
 template<typename T>
 Matrix<T> getMinor(const Matrix<T> &A, size_t remove_row, size_t remove_col) {
     size_t rows = A.getRows();
@@ -350,7 +349,7 @@ Matrix<T> getMinor(const Matrix<T> &A, size_t remove_row, size_t remove_col) {
 
 template<typename T>
 T determinant(const Matrix<T> &A) {
-	if (A.getRows() != A.getCols()) {
+	if (!A.isSquare()) {
         throw std::invalid_argument("Determinant only defined for square matrices");
     }
 
@@ -375,7 +374,7 @@ T determinant(const Matrix<T> &A) {
 
 template<typename T>
 T determinant_efficient(const Matrix<T> &A) {
-    if (A.getRows() != A.getCols()) {
+    if (!A.isSquare()) {
         throw std::invalid_argument("Determinant only defined for square matrices");
     }
     
@@ -391,6 +390,86 @@ T determinant_efficient(const Matrix<T> &A) {
     }
     
     return det;
+}
+
+// ex12
+// Gauss-Jordan strategy
+// Add this function to Matrix.hpp (outside the class):
+template<typename T>
+size_t find_pivot_row(const Matrix<T> &matrix, size_t start_row, size_t col) {
+    for (size_t i = start_row; i < matrix.getRows(); ++i) {
+        if (std::abs(matrix(i, col)) > 1e-10) {
+            return i;
+        }
+    }
+    return SIZE_MAX;
+}
+
+template<typename T>
+void gauss_jordan_elimination(Matrix<T> &augmented) {
+    size_t n = augmented.getRows();
+    
+    for (size_t col = 0; col < n; ++col) {
+        size_t pivot_row = find_pivot_row(augmented, col, col);
+        if (pivot_row == SIZE_MAX) {
+            throw std::runtime_error("Matrix is singular");
+        }
+        
+        if (pivot_row != col) {
+            augmented.swap_rows(col, pivot_row);
+        }
+        
+        T pivot = augmented(col, col);
+        for (size_t j = 0; j < augmented.getCols(); ++j) {
+            augmented(col, j) /= pivot;
+        }
+        
+        for (size_t i = 0; i < n; ++i) {
+            if (i != col && std::abs(augmented(i, col)) > 1e-10) {
+                T factor = augmented(i, col);
+                for (size_t j = 0; j < augmented.getCols(); ++j) {
+                    augmented(i, j) -= factor * augmented(col, j);
+                }
+            }
+        }
+    }
+}
+
+template<typename T>
+Matrix<T> inverse(const Matrix<T> &A) {
+	if (!A.isSquare()) {
+		throw std::invalid_argument("Inverse only defined for square matrices");
+	}
+
+	if (std::abs(determinant(A)) < 1e-10) {
+		throw std::runtime_error("Matrix is singular (non-invertible)");
+	}
+
+	size_t n = A.getRows();
+	Matrix<T> augmented(n, 2 * n);
+
+	for (size_t i = 0; i < n; ++i) {
+        for (size_t j = 0; j < n; ++j) {
+            augmented(i, j) = A(i, j);
+        }
+    }
+
+	for (size_t i = 0; i < n; ++i) {
+        for (size_t j = 0; j < n; ++j) {
+            augmented(i, j + n) = (i == j) ? T{1} : T{0};
+        }
+    }
+
+	gauss_jordan_elimination(augmented);
+
+	Matrix<T> result(n, n);
+    for (size_t i = 0; i < n; ++i) {
+        for (size_t j = 0; j < n; ++j) {
+            result(i, j) = augmented(i, j + n);
+        }
+    }
+    
+    return result;
 }
 
 #endif
