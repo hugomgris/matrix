@@ -736,5 +736,3 @@ Strong exception safety guarantees through RAII and careful resource management.
 This project is developed as part of the 42 curriculum. Educational use permitted with attribution.
 
 ---
-
-**Note**: This implementation prioritizes educational clarity and mathematical correctness over maximum performance optimization. For production applications requiring extreme performance, consider specialized libraries like BLAS, LAPACK, or Eigen.
