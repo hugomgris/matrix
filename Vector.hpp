@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Vector.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hmunoz-g <hmunoz-g@student.42.fr>          +#+  +:+       +#+        */
+/*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/19 15:12:51 by hmunoz-g          #+#    #+#             */
-/*   Updated: 2025/08/22 08:55:35 by hmunoz-g         ###   ########.fr       */
+/*   Updated: 2025/08/23 09:53:03 by marvin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,7 @@
 # include <exception>
 # include <stdexcept>
 # include <cmath>
+# include <type_traits>
 
 template <typename T> class Matrix;
 
@@ -158,7 +159,11 @@ Vector<T> linear_combination(const std::vector<Vector<T>> &vectors, const std::v
 
 	for (size_t i = 0; i < result.getSize(); ++i) {
 		for (size_t j = 0; j < vectors.size(); ++j) {
-			result[i] = std::fma(coeffs[j], vectors[j][i], result[i]);
+			if constexpr (std::is_arithmetic_v<T>) {
+				result[i] = std::fma(coeffs[j], vectors[j][i], result[i]);
+			} else {
+				result[i] += coeffs[j] * vectors[j][i];
+			}
 		}
 	}
 	return (result);
@@ -208,45 +213,72 @@ T dot(const Vector<T> &u, const Vector<T> &v) {
 		result += u[i] * v[i];
 	} */
 
-	// fma way
+	// fma way (with template specialization support for complex)
 	for (size_t i = 0; i < u.getSize(); ++i) {
-		result = std::fma(u[i], v[i], result);
+		if constexpr (std::is_arithmetic_v<T>) {
+			result = std::fma(u[i], v[i], result);
+		} else {
+			result += u[i] * v[i];
+		}
 	}
 
 	return (result);
 }
 
 // ex04
-	// norm = distance measure
+// norm = distance measure
 template<typename T>
-T norm_1(const Vector<T> &u) {
-	T result = T{};
+auto norm_1(const Vector<T> &u) -> typename std::conditional<std::is_arithmetic_v<T>, T, typename T::value_type>::type {
+	using ReturnType = typename std::conditional<std::is_arithmetic_v<T>, T, typename T::value_type>::type;
+	ReturnType result = ReturnType{};
 
 	for (size_t i = 0; i < u.getSize(); ++i) {
-		result += std::max(u[i], -u[i]);
+		if constexpr (std::is_arithmetic_v<T>) {
+			result += std::max(u[i], -u[i]);
+		} else {
+			// For complex numbers -> use magnitude
+			result += u[i].magnitude();
+		}
 	}
 
 	return (result);
 }
 
 template<typename T>
-T norm(const Vector<T> &u) {
-	return (std::pow(dot(u, u), T{0.5}));
+auto norm(const Vector<T> &u) -> typename std::conditional<std::is_arithmetic_v<T>, T, typename T::value_type>::type {
+	if constexpr (std::is_arithmetic_v<T>) {
+		return (std::pow(dot(u, u), T{0.5}));
+	} else {
+		// For complex numbers -> use real part of the dot product
+		auto dot_result = dot(u, u);
+		return std::sqrt(dot_result.getReal());
+	}
 }
 
 template<typename T>
-T norm_inf(const Vector<T> &u) {
+auto norm_inf(const Vector<T> &u) -> typename std::conditional<std::is_arithmetic_v<T>, T, typename T::value_type>::type {
 	if (u.getSize() == 0) {
 		throw std::invalid_argument("Cannot compute norm of empty vector");
 	}
 	
-	T result = std::max(u[0], -u[0]);
-	for (size_t i = 1; i < u.getSize(); ++i) {
-		T abs = std::max(u[i], -u[i]);
-		result = std::max(result, abs);
+	using ReturnType = typename std::conditional<std::is_arithmetic_v<T>, T, typename T::value_type>::type;
+	
+	if constexpr (std::is_arithmetic_v<T>) {
+		T result = std::max(u[0], -u[0]);
+		for (size_t i = 1; i < u.getSize(); ++i) {
+			T abs = std::max(u[i], -u[i]);
+			result = std::max(result, abs);
+		}
+		return (result);
+	} else {
+		// For complex numbers -> use magnitude
+		ReturnType result = u[0].magnitude();
+		for (size_t i = 1; i < u.getSize(); ++i) {
+			ReturnType abs = u[i].magnitude();
+			result = std::max(result, abs);
+		}
+		return (result);
 	}
-
-	return (result);
 }
 
 // ex05

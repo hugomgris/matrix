@@ -6,7 +6,7 @@
 /*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/19 15:30:27 by hmunoz-g          #+#    #+#             */
-/*   Updated: 2025/08/22 17:43:55 by marvin           ###   ########.fr       */
+/*   Updated: 2025/08/23 09:41:32 by marvin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,7 @@
 # include <stdexcept>
 # include <cstdint>
 # include <cmath>
+# include <type_traits>
 
 template<typename T> class Vector;
 
@@ -187,11 +188,15 @@ Vector<T> mul_vec(const Matrix<T> &A, const Vector<T> &u) {
 		result_data.push_back(dot(Vector<T>(matrixElements), u));
 	} */
 
-	// Version with fma
+	// Version with fma (and complex number support)
 	for (size_t i = 0; i < A.getRows(); ++i) {
         T sum = T{};
         for (size_t j = 0; j < A.getCols(); ++j) {
-            sum = std::fma(A(i, j), u[j], sum);
+            if constexpr (std::is_arithmetic_v<T>) {
+				sum = std::fma(A(i, j), u[j], sum);
+			} else {
+				sum += A(i, j) * u[j];
+			}
         }
         result_data.push_back(sum);
     }
@@ -368,7 +373,7 @@ T determinant(const Matrix<T> &A) {
 	T det = T{};
     for (size_t j = 0; j < n; ++j) {
         Matrix<T> minor = getMinor(A, 0, j);
-        T cofactor = ((j % 2 == 0) ? 1 : -1) * determinant(minor);
+        T cofactor = ((j % 2 == 0) ? T{1} : T{-1}) * determinant(minor);
         det += A(0, j) * cofactor;
     }
     return det;
