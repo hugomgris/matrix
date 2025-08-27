@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Vector.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
+/*   By: hmunoz-g <hmunoz-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/19 15:12:51 by hmunoz-g          #+#    #+#             */
-/*   Updated: 2025/08/23 09:53:03 by marvin           ###   ########.fr       */
+/*   Updated: 2025/08/27 09:37:22 by hmunoz-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -159,7 +159,7 @@ Vector<T> linear_combination(const std::vector<Vector<T>> &vectors, const std::v
 
 	for (size_t i = 0; i < result.getSize(); ++i) {
 		for (size_t j = 0; j < vectors.size(); ++j) {
-			if constexpr (std::is_arithmetic_v<T>) {
+			if constexpr (std::is_arithmetic<T>::value) {
 				result[i] = std::fma(coeffs[j], vectors[j][i], result[i]);
 			} else {
 				result[i] += coeffs[j] * vectors[j][i];
@@ -215,7 +215,7 @@ T dot(const Vector<T> &u, const Vector<T> &v) {
 
 	// fma way (with template specialization support for complex)
 	for (size_t i = 0; i < u.getSize(); ++i) {
-		if constexpr (std::is_arithmetic_v<T>) {
+		if constexpr (std::is_arithmetic<T>::value) {
 			result = std::fma(u[i], v[i], result);
 		} else {
 			result += u[i] * v[i];
@@ -228,57 +228,66 @@ T dot(const Vector<T> &u, const Vector<T> &v) {
 // ex04
 // norm = distance measure
 template<typename T>
-auto norm_1(const Vector<T> &u) -> typename std::conditional<std::is_arithmetic_v<T>, T, typename T::value_type>::type {
-	using ReturnType = typename std::conditional<std::is_arithmetic_v<T>, T, typename T::value_type>::type;
-	ReturnType result = ReturnType{};
-
+T norm_1(const Vector<T> &u, typename std::enable_if<std::is_arithmetic<T>::value>::type* = nullptr) {
+	T result = T{};
 	for (size_t i = 0; i < u.getSize(); ++i) {
-		if constexpr (std::is_arithmetic_v<T>) {
-			result += std::max(u[i], -u[i]);
-		} else {
-			// For complex numbers -> use magnitude
-			result += u[i].magnitude();
-		}
+		result += std::max(u[i], -u[i]);
 	}
-
 	return (result);
 }
 
 template<typename T>
-auto norm(const Vector<T> &u) -> typename std::conditional<std::is_arithmetic_v<T>, T, typename T::value_type>::type {
-	if constexpr (std::is_arithmetic_v<T>) {
-		return (std::pow(dot(u, u), T{0.5}));
-	} else {
-		// For complex numbers -> use real part of the dot product
-		auto dot_result = dot(u, u);
-		return std::sqrt(dot_result.getReal());
+typename T::value_type norm_1(const Vector<T> &u, typename std::enable_if<!std::is_arithmetic<T>::value>::type* = nullptr) {
+	using ReturnType = typename T::value_type;
+	ReturnType result = ReturnType{};
+	for (size_t i = 0; i < u.getSize(); ++i) {
+		// For complex numbers -> use magnitude
+		result += u[i].magnitude();
 	}
+	return (result);
 }
 
 template<typename T>
-auto norm_inf(const Vector<T> &u) -> typename std::conditional<std::is_arithmetic_v<T>, T, typename T::value_type>::type {
+T norm(const Vector<T> &u, typename std::enable_if<std::is_arithmetic<T>::value>::type* = nullptr) {
+	return (std::pow(dot(u, u), T{0.5}));
+}
+
+template<typename T>
+typename T::value_type norm(const Vector<T> &u, typename std::enable_if<!std::is_arithmetic<T>::value>::type* = nullptr) {
+	// For complex numbers -> use real part of the dot product
+	auto dot_result = dot(u, u);
+	return std::sqrt(dot_result.getReal());
+}
+
+template<typename T>
+T norm_inf(const Vector<T> &u, typename std::enable_if<std::is_arithmetic<T>::value>::type* = nullptr) {
 	if (u.getSize() == 0) {
 		throw std::invalid_argument("Cannot compute norm of empty vector");
 	}
 	
-	using ReturnType = typename std::conditional<std::is_arithmetic_v<T>, T, typename T::value_type>::type;
-	
-	if constexpr (std::is_arithmetic_v<T>) {
-		T result = std::max(u[0], -u[0]);
-		for (size_t i = 1; i < u.getSize(); ++i) {
-			T abs = std::max(u[i], -u[i]);
-			result = std::max(result, abs);
-		}
-		return (result);
-	} else {
-		// For complex numbers -> use magnitude
-		ReturnType result = u[0].magnitude();
-		for (size_t i = 1; i < u.getSize(); ++i) {
-			ReturnType abs = u[i].magnitude();
-			result = std::max(result, abs);
-		}
-		return (result);
+	T result = std::max(u[0], -u[0]);
+	for (size_t i = 1; i < u.getSize(); ++i) {
+		T abs = std::max(u[i], -u[i]);
+		result = std::max(result, abs);
 	}
+	return (result);
+}
+
+template<typename T>
+typename T::value_type norm_inf(const Vector<T> &u, typename std::enable_if<!std::is_arithmetic<T>::value>::type* = nullptr) {
+	if (u.getSize() == 0) {
+		throw std::invalid_argument("Cannot compute norm of empty vector");
+	}
+	
+	using ReturnType = typename T::value_type;
+	
+	// For complex numbers -> use magnitude
+	ReturnType result = u[0].magnitude();
+	for (size_t i = 1; i < u.getSize(); ++i) {
+		ReturnType abs = u[i].magnitude();
+		result = std::max(result, abs);
+	}
+	return (result);
 }
 
 // ex05

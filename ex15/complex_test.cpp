@@ -43,6 +43,10 @@ int main() {
     auto n1 = norm_1(u);
     auto n2 = norm(u);
     auto ninf = norm_inf(u);
+
+    (void) n1;
+    (void) n2;
+    (void) ninf;
     
     // ex07
     Matrix<C> A(2, 2, {C(1,1), C(2,0), C(0,-1), C(3,2)});

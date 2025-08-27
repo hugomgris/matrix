@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Matrix.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
+/*   By: hmunoz-g <hmunoz-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/19 15:30:27 by hmunoz-g          #+#    #+#             */
-/*   Updated: 2025/08/23 09:41:32 by marvin           ###   ########.fr       */
+/*   Updated: 2025/08/27 09:37:22 by hmunoz-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -192,7 +192,7 @@ Vector<T> mul_vec(const Matrix<T> &A, const Vector<T> &u) {
 	for (size_t i = 0; i < A.getRows(); ++i) {
         T sum = T{};
         for (size_t j = 0; j < A.getCols(); ++j) {
-            if constexpr (std::is_arithmetic_v<T>) {
+            if constexpr (std::is_arithmetic<T>::value) {
 				sum = std::fma(A(i, j), u[j], sum);
 			} else {
 				sum += A(i, j) * u[j];
