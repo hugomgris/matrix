@@ -401,7 +401,6 @@ T determinant_efficient(const Matrix<T> &A) {
 
 // ex12
 // Gauss-Jordan strategy
-// Add this function to Matrix.hpp (outside the class):
 template<typename T>
 size_t find_pivot_row(const Matrix<T> &matrix, size_t start_row, size_t col) {
     for (size_t i = start_row; i < matrix.getRows(); ++i) {
